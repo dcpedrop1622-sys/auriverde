@@ -16,6 +16,9 @@ const ESPACOS_VAZIOS = 4;
 // Velocidade do giro automático, em pixels por segundo
 const VELOCIDADE = 40;
 
+// Quantas vezes a lista de fotos se repete na faixa (cobre telas largas)
+const COPIAS = 6;
+
 export function Carrossel() {
   const faixaRef = useRef<HTMLDivElement>(null);
   const offset = useRef(0);
@@ -42,11 +45,11 @@ export function Carrossel() {
           offset.current -= VELOCIDADE * dt;
         }
 
-        // A faixa tem duas cópias das fotos; ao passar da metade, volta ao início
-        const metade = faixa.scrollWidth / 2;
-        if (metade > 0) {
-          let o = offset.current % metade;
-          if (o > 0) o -= metade;
+        // Tamanho de uma cópia da lista; ao passar dele, volta ao início
+        const periodo = faixa.scrollWidth / COPIAS;
+        if (periodo > 0) {
+          let o = offset.current % periodo;
+          if (o > 0) o -= periodo;
           offset.current = o;
         }
 
@@ -87,14 +90,14 @@ export function Carrossel() {
       onContextMenu={(e) => e.preventDefault()}
     >
       <div ref={faixaRef} className="flex w-max will-change-transform">
-        {[0, 1].map((copia) =>
+        {Array.from({ length: COPIAS }, (_, copia) =>
           itens.map((foto, i) => (
             <div
               key={`${copia}-${i}`}
-              className="pr-4 shrink-0"
-              aria-hidden={copia === 1}
+              className="pr-4 md:pr-6 shrink-0"
+              aria-hidden={copia > 0}
             >
-              <div className="w-64 h-64 rounded-2xl overflow-hidden bg-black/30 border-2 border-dashed border-yellow-300/50">
+              <div className="w-64 h-64 md:w-80 md:h-80 rounded-2xl overflow-hidden bg-black/30 border-2 border-dashed border-yellow-300/50">
                 {foto && (
                   // eslint-disable-next-line @next/next/no-img-element
                   <img
